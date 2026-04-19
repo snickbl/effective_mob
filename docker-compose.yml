@@ -1,0 +1,32 @@
+
+services:
+  backend:
+    build: ./backend
+    env_file:
+      - ./backend/.env
+    entrypoint: "python app.py"
+    container_name: backend
+    networks:
+      - app-network
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  nginx:
+    image: nginx:1.30.0-alpine-perl
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
